@@ -1,0 +1,85 @@
+name: Security and Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security-quality-checks:
+    name: Security & Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm ci
+
+
+
+      - name: Run ESLint
+        run: npx eslint . 
+
+
+
+      # Prettier for code formatting check
+      - name: Run Prettier
+        run: npx prettier --check .
+        continue-on-error: true
+
+      # Dependency Security Check with npm audit
+      - name: Check for Vulnerabilities (npm audit)
+        run: npm audit --audit-level=high || echo "Security vulnerabilities detected"
+
+      # Snyk for security vulnerabilities
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+
+      # CodeQL analysis for security issues
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      # Detect exposed API keys and secrets using TruffleHog
+      - name: Scan for Exposed Secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: .
+          base: HEAD
+          extra_args: "--json"
+
+      # Log detected issues
+      - name: Upload Security Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-logs
+          path: |
+            npm-audit.log
+            snyk.log
+          if-no-files-found: warn
+
+      # Create a GitHub issue for security findings
+      - name: Create GitHub Issue if Security Issues Found
+        if: failure()
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Security Issues Detected in Latest CI Run"
+          content-filepath: npm-audit.log
+          labels: bug, security
