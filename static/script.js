@@ -1,21 +1,21 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   document
-    .getElementById('fileUploadForm')
-    .addEventListener('submit', async (e) => {
+    .getElementById("fileUploadForm")
+    .addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      let fileInput = document.getElementById('file').files[0];
+      let fileInput = document.getElementById("file").files[0];
       if (!fileInput) {
-        alert('Please select a file to upload.');
+        alert("Please select a file to upload.");
         return;
       }
 
       let formData = new FormData();
-      formData.append('file', fileInput);
+      formData.append("file", fileInput);
 
       try {
-        let response = await fetch('/analyze', {
-          method: 'POST',
+        let response = await fetch("/analyze", {
+          method: "POST",
           body: formData,
         });
 
@@ -24,12 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let result = await response.json();
-        document.getElementById('output').innerHTML = `
+        document.getElementById("output").innerHTML = `
                 <pre>${JSON.stringify(result, null, 2)}</pre>
             `;
       } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('output').innerHTML =
+        console.error("Error:", error);
+        document.getElementById("output").innerHTML =
           `<p style="color: red;">Error: ${error.message}</p>`;
       }
     });

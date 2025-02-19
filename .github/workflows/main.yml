@@ -15,7 +15,7 @@ jobs:
 
     permissions:
       contents: read
-      security-events: write  # ✅ Added required permission for CodeQL to upload results
+      security-events: write # ✅ Added required permission for CodeQL to upload results
 
     steps:
       - name: Checkout Repository
@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npx eslint . 
+        run: npx eslint .
 
       # Prettier for code formatting check
       - name: Run Prettier
