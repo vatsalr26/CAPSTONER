@@ -13,6 +13,10 @@ jobs:
     name: Security & Quality Analysis
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      security-events: write  # ✅ Added required permission for CodeQL to upload results
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -25,12 +29,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-
-
       - name: Run ESLint
         run: npx eslint . 
-
-
 
       # Prettier for code formatting check
       - name: Run Prettier
